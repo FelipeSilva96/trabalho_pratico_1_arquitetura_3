@@ -363,7 +363,7 @@ trabalho_pratico_1_arquitetura_3/
 │
 ├── sim/
 │ └── wave.vcd
-│
+│ └── rascunho_do_livro.sv
 └── README.md
 ```
 
