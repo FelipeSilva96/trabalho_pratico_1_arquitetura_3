@@ -179,35 +179,41 @@ O estado COMPARE_TAG é responsável por verificar se a requisição da CPU gera
 
 Nesse estado, o controlador:
 
-1 - Usa o campo index do endereço para acessar a linha correspondente da cache.
-2 - Lê a tag armazenada nessa linha.
-3 - Lê o valid bit.
-4 - Compara a tag armazenada com a tag do endereço solicitado.
-5 - Decide se ocorreu hit ou miss.
+- Usa o campo index do endereço para acessar a linha correspondente da cache.
+- Lê a tag armazenada nessa linha.
+- Lê o valid bit.
+- Compara a tag armazenada com a tag do endereço solicitado.
+- Decide se ocorreu hit ou miss.
 
 A condição de hit é:
 
+```
 hit = valid == 1 && tag_armazenada == tag_do_endereco
+```
 
 #### Em caso de hit de leitura
 
 Se a requisição for uma leitura e houver hit:
 
+```
 Cache seleciona a palavra correta dentro do bloco
 Cache retorna o dado para a CPU
 Cache sinaliza ready
 FSM retorna para IDLE
+```
 
 #### Em caso de hit de escrita
 
 Se a requisição for uma escrita e houver hit:
 
+```
 Cache seleciona a palavra correta dentro do bloco
 Cache modifica essa palavra
 Cache mantém valid = 1
 Cache marca dirty = 1
 Cache sinaliza ready
 FSM retorna para IDLE
+```
 
 #### Em caso de miss
 
@@ -215,9 +221,9 @@ Se houver miss, o controlador verifica a situação da linha antiga.
 
 Existem três possibilidades:
 
-1 - Linha inválida
-2 - Linha válida e limpa
-3 - Linha válida e suja
+- Linha inválida
+- Linha válida e limpa
+- Linha válida e suja
 
 Se a linha estiver inválida ou limpa, o controlador pode buscar diretamente o novo bloco na memória principal.
 
@@ -251,6 +257,7 @@ Após a conclusão da escrita, avança para ALLOCATE.
 
 Fluxo conceitual:
 
+```
 WRITE_BACK:
 enviar bloco antigo para memória
 
@@ -259,6 +266,7 @@ enviar bloco antigo para memória
 
     se mem_data.ready == 1:
         ir para ALLOCATE
+```
 
 #### Observação importante
 
@@ -432,6 +440,8 @@ Arquivo de testbench do projeto.
 - Verificar substituição de blocos
 - Verificar write-back
 - Gerar arquivo .vcd para visualização no GTKWave
+
+---
 
 ## 🛠️ Ferramentas Utilizadas
 
@@ -992,5 +1002,4 @@ O principal objetivo é compreender, por meio de simulação, como um controlado
 - **Diego Feitosa Ferreira**
 - **Kauan Gabriel Pereira**
 - **Mateus Resende Ottoni**
-
 ---
