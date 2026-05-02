@@ -1,6 +1,6 @@
-# Trabalho Prático 1 — Controlador de Cache
+# 📘 Trabalho Prático 1 — Controlador de Cache
 
-## Objetivo
+## 🎯 Objetivo
 
 Este projeto tem como objetivo implementar, simular e analisar um **controlador de cache** em **SystemVerilog**, com base no modelo apresentado no livro _Computer Organization and Design: The Hardware/Software Interface — RISC-V Edition_, de Patterson & Hennessy.
 
@@ -10,7 +10,7 @@ Este projeto tem caráter didático e acadêmico. O objetivo não é implementar
 
 ---
 
-## Conceitos Envolvidos
+## 🧠 Conceitos Envolvidos
 
 Este trabalho envolve os seguintes conceitos fundamentais de arquitetura de computadores:
 
@@ -37,7 +37,7 @@ Este trabalho envolve os seguintes conceitos fundamentais de arquitetura de comp
 
 ---
 
-## Descrição Geral do Projeto
+## 📝 Descrição Geral do Projeto
 
 O projeto implementa um controlador de cache simplificado, baseado em uma cache **direct-mapped**, isto é, uma cache mapeada diretamente.
 
@@ -62,7 +62,7 @@ A cache utilizada neste projeto segue o modelo didático apresentado no livro de
 
 ---
 
-## Organização do Endereço
+## 🏗️ Organização do Endereço
 
 A cache trabalha com endereços de 32 bits.
 
@@ -71,6 +71,7 @@ Como a cache possui 1024 linhas, são necessários 10 bits para selecionar a lin
 ```text
 1024 = 2^10
 ```
+
 Como cada bloco possui 16 bytes, são necessários 4 bits para selecionar o byte dentro do bloco:
 
 ```text
@@ -79,21 +80,20 @@ Como cada bloco possui 16 bytes, são necessários 4 bits para selecionar o byte
 
 Assim, o endereço de 32 bits é dividido da seguinte forma:
 
-31                  14 13          4 3        0
-+---------------------+-------------+----------+
-|        TAG          |    INDEX    |  OFFSET  |
-+---------------------+-------------+----------+
-        18 bits          10 bits       4 bits
+| Bits [31:14] | Bits [13:4] | Bits [3:0] |
+| :----------- | :---------- | :--------- |
+| **TAG**      | **INDEX**   | **OFFSET** |
+| 18 bits      | 10 bits     | 4 bits     |
 
-## Campos do endereço
+---
+
+## 📍 Campos do endereço
 
 | Campo  |      Bits | Tamanho | Função                                                             |
 | ------ | --------: | ------: | ------------------------------------------------------------------ |
 | Tag    | `[31:14]` | 18 bits | Identifica qual bloco da memória está armazenado na linha da cache |
 | Index  |  `[13:4]` | 10 bits | Seleciona uma das 1024 linhas da cache                             |
 | Offset |   `[3:0]` |  4 bits | Seleciona uma posição dentro do bloco de 16 bytes                  |
-
-
 
 Como cada bloco possui 4 palavras de 32 bits, os bits addr[3:2] são usados para selecionar qual palavra será lida ou escrita dentro do bloco:
 
@@ -104,8 +104,7 @@ Como cada bloco possui 4 palavras de 32 bits, os bits addr[3:2] são usados para
 | `2'b10`     | Palavra 2           | `[95:64]`     |
 | `2'b11`     | Palavra 3           | `[127:96]`    |
 
-
-## Política de Escrita
+## ✍️ Política de Escrita
 
 A política de escrita adotada neste projeto é write-back.
 
@@ -115,15 +114,17 @@ A linha modificada é marcada com dirty = 1.
 
 A memória principal só será atualizada posteriormente, quando esse bloco precisar ser substituído por outro bloco.
 
-### Vantagem
+### 🟢 Vantagem
 
 A política write-back reduz a quantidade de escritas na memória principal, pois várias escritas podem ser feitas na cache antes que seja necessário atualizar a memória.
 
-### Consequência
+### 🛑 Consequência
 
 A cache precisa controlar quais blocos foram modificados. Por isso, cada linha possui um dirty bit.
 
-## Política de Alocação
+---
+
+## 🔍 Política de Alocação
 
 A política de alocação adotada é write-allocate.
 
@@ -131,26 +132,28 @@ Na política write-allocate, quando ocorre uma escrita em um endereço que não 
 
 Portanto, uma escrita com miss segue o seguinte comportamento geral:
 
-CPU solicita escrita
-Cache detecta miss
-Cache busca o bloco na memória principal
-Cache aloca o bloco
-Cache modifica a palavra solicitada
-Cache marca a linha como dirty
-Cache responde à CPU
+- CPU solicita escrita
+- Cache detecta miss
+- Cache busca o bloco na memória principal
+- Cache aloca o bloco
+- Cache modifica a palavra solicitada
+- Cache marca a linha como dirty
+- Cache responde à CPU
 
-## Estados da Máquina de Estados
+---
+
+## 🤖 Estados da Máquina de Estados
 
 O controlador de cache é implementado como uma máquina de estados finitos, ou FSM.
 
 A FSM possui quatro estados principais:
 
-IDLE
-COMPARE_TAG
-ALLOCATE
-WRITE_BACK
+- **IDLE**
+- **COMPARE_TAG**
+- **ALLOCATE**
+- **WRITE_BACK**
 
-### Estado IDLE
+### 💤 Estado IDLE
 
 O estado IDLE é o estado de repouso do controlador.
 
@@ -162,13 +165,15 @@ Se houver uma requisição válida, o controlador avança para o estado COMPARE_
 
 Fluxo conceitual:
 
+```
 Se cpu_req.valid == 0:
-    permanecer em IDLE
+permanecer em IDLE
 
 Se cpu_req.valid == 1:
-    ir para COMPARE_TAG
+ir para COMPARE_TAG
+```
 
-### Estado COMPARE_TAG
+### 🔍 Estado COMPARE_TAG
 
 O estado COMPARE_TAG é responsável por verificar se a requisição da CPU gera um hit ou um miss.
 
@@ -219,180 +224,18 @@ Se a linha estiver inválida ou limpa, o controlador pode buscar diretamente o n
 Se a linha estiver suja, o controlador precisa primeiro escrever o bloco antigo de volta na memória principal.
 
 Fluxo conceitual:
-
+```
 Se miss e linha inválida:
-    ir para ALLOCATE
+ir para ALLOCATE
 
 Se miss e linha limpa:
-    ir para ALLOCATE
+ir para ALLOCATE
 
 Se miss e linha suja:
-    ir para WRITE_BACK
-
-### Estado ALLOCATE
-
-O estado ALLOCATE é responsável por buscar o novo bloco na memória principal.
-
-Esse estado ocorre em situações de miss.
-
-Nesse estado, o controlador:
-
-Solicita à memória principal a leitura do bloco correspondente ao endereço da CPU.
-Aguarda a memória sinalizar ready.
-Recebe o bloco de 128 bits vindo da memória principal.
-Escreve esse bloco na linha selecionada da cache.
-Atualiza a tag da linha.
-Marca a linha como válida.
-Retorna para COMPARE_TAG.
-
-Fluxo conceitual:
-
-ALLOCATE:
-    solicitar leitura do bloco novo
-
-    se mem_data.ready == 0:
-        permanecer em ALLOCATE
-
-    se mem_data.ready == 1:
-        armazenar bloco na cache
-        retornar para COMPARE_TAG
-
-O retorno para COMPARE_TAG permite que a requisição original seja reavaliada. Após o bloco ser carregado, a comparação de tag deve resultar em hit.
-
-## Fluxos Esperados
-
-#### Leitura com hit
-
-IDLE -> COMPARE_TAG -> IDLE
-
-
-#### Leitura com miss em linha inválida ou limpa
-
-IDLE -> COMPARE_TAG -> ALLOCATE -> COMPARE_TAG -> IDLE
-
-#### Leitura com miss em linha suja
-
-IDLE -> COMPARE_TAG -> WRITE_BACK -> ALLOCATE -> COMPARE_TAG -> IDLE
-
-#### Escrita com hit
-
-IDLE -> COMPARE_TAG -> IDLE
-
-#### Escrita com miss em linha inválida ou limpa
-
-IDLE -> COMPARE_TAG -> ALLOCATE -> COMPARE_TAG -> IDLE
-
-#### Escrita com miss em linha suja
-
-IDLE -> COMPARE_TAG -> WRITE_BACK -> ALLOCATE -> COMPARE_TAG -> IDLE
-
-## Estrutura do Projeto
-
-A organização sugerida para o projeto é:
-
-trabalho_pratico_1_arquitetura_3/
-├── src/
-│   ├── cache_def.sv
-│   ├── dm_cache_data.sv
-│   ├── dm_cache_tag.sv
-│   ├── dm_cache_fsm.sv
-│   └── main_memory.sv
-│
-├── tb/
-│   └── tb_dm_cache_fsm.sv
-│
-├── sim/
-│   └── wave.vcd
-│
-└── README.md
-
-## Descrição dos Arquivos
-
-```text
-src/cache_def.sv
+ir para WRITE_BACK
 ```
 
-Arquivo responsável por armazenar as definições globais do projeto.
-
-Contém:
-
-Parâmetros da tag
-- Tipo da entrada de tag
-- Tipo do bloco de dados da cache
-- Tipo da requisição da CPU para a cache
-- Tipo da resposta da cache para a CPU
-- Tipo da requisição da cache para a memória
-- Tipo da resposta da memória para a cache
-
-```text
-src/dm_cache_data.sv
-```
-Implementa a memória de dados da cache.
-
-A cache possui 1024 linhas, e cada linha armazena um bloco de 128 bits.
-
-Cada bloco representa quatro palavras de 32 bits.
-
-```text
-src/dm_cache_tag.sv
-```
-Implementa a memória de tags da cache.
-
-Cada linha da cache possui uma entrada de tag contendo:
-
-- valid
-- dirty
-- tag
-
-
-
-
-
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-####
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Estado WRITE_BACK
+### 💾 Estado WRITE_BACK
 
 O estado WRITE_BACK é usado quando ocorre um miss em uma linha válida e suja.
 
@@ -409,7 +252,7 @@ Após a conclusão da escrita, avança para ALLOCATE.
 Fluxo conceitual:
 
 WRITE_BACK:
-    enviar bloco antigo para memória
+enviar bloco antigo para memória
 
     se mem_data.ready == 0:
         permanecer em WRITE_BACK
@@ -424,5 +267,730 @@ No write-back, o endereço usado não é o endereço novo solicitado pela CPU.
 O endereço usado no write-back deve ser o endereço do bloco antigo, formado pela tag antiga armazenada na cache e pelo índice da linha atual.
 
 De forma conceitual:
-
+```
 endereco_write_back = {tag_antiga, index, offset_zero}
+```
+### 🏗️ Estado ALLOCATE
+
+O estado ALLOCATE é responsável por buscar o novo bloco na memória principal.
+
+Esse estado ocorre em situações de miss.
+
+Nesse estado, o controlador:
+
+- Solicita à memória principal a leitura do bloco correspondente ao endereço da CPU.
+- Aguarda a memória sinalizar ready.
+- Recebe o bloco de 128 bits vindo da memória principal.
+- Escreve esse bloco na linha selecionada da cache.
+- Atualiza a tag da linha.
+- Marca a linha como válida.
+- Retorna para COMPARE_TAG.
+
+Fluxo conceitual:
+
+```
+ALLOCATE:
+solicitar leitura do bloco novo
+
+    se mem_data.ready == 0:
+        permanecer em ALLOCATE
+
+    se mem_data.ready == 1:
+        armazenar bloco na cache
+        retornar para COMPARE_TAG
+```
+
+O retorno para COMPARE_TAG permite que a requisição original seja reavaliada. Após o bloco ser carregado, a comparação de tag deve resultar em hit.
+
+---
+
+## 🌊  Fluxos Esperados
+
+#### Leitura com hit
+```
+IDLE -> COMPARE_TAG -> IDLE
+```
+#### Leitura com miss em linha inválida ou limpa
+```
+IDLE -> COMPARE_TAG -> ALLOCATE -> COMPARE_TAG -> IDLE
+```
+#### Leitura com miss em linha suja
+```
+IDLE -> COMPARE_TAG -> WRITE_BACK -> ALLOCATE -> COMPARE_TAG -> IDLE
+```
+#### Escrita com hit
+```
+IDLE -> COMPARE_TAG -> IDLE
+```
+#### Escrita com miss em linha inválida ou limpa
+```
+IDLE -> COMPARE_TAG -> ALLOCATE -> COMPARE_TAG -> IDLE
+```
+#### Escrita com miss em linha suja
+```
+IDLE -> COMPARE_TAG -> WRITE_BACK -> ALLOCATE -> COMPARE_TAG -> IDLE
+```
+
+---
+
+## 📂 Estrutura do Projeto
+
+A organização sugerida para o projeto é:
+
+```
+trabalho_pratico_1_arquitetura_3/
+├── src/
+│ ├── cache_def.sv
+│ ├── dm_cache_data.sv
+│ ├── dm_cache_tag.sv
+│ ├── dm_cache_fsm.sv
+│ └── main_memory.sv
+│
+├── tb/
+│ └── tb_dm_cache_fsm.sv
+│
+├── sim/
+│ └── wave.vcd
+│
+└── README.md
+```
+
+---
+
+## 📄 Descrição dos Arquivos
+
+`src/cache_def.sv`
+
+Arquivo responsável por armazenar as definições globais do projeto.
+
+Contém:
+
+Parâmetros da tag
+
+- Tipo da entrada de tag
+- Tipo do bloco de dados da cache
+- Tipo da requisição da CPU para a cache
+- Tipo da resposta da cache para a CPU
+- Tipo da requisição da cache para a memória
+- Tipo da resposta da memória para a cache
+
+`src/dm_cache_data.sv`
+
+Implementa a memória de dados da cache.
+
+A cache possui 1024 linhas, e cada linha armazena um bloco de 128 bits.
+
+Cada bloco representa quatro palavras de 32 bits.
+
+`src/dm_cache_tag.sv`
+
+Implementa a memória de tags da cache.
+
+Cada linha da cache possui uma entrada de tag contendo:
+
+- `valid`
+- `dirty`
+- `tag`
+
+`src/dm_cache_fsm.sv`
+
+Implementa o controlador principal da cache.
+
+Esse módulo é responsável por:
+
+- Receber requisições da CPU
+- Detectar hit ou miss
+- Controlar leituras da cache
+- Controlar escritas na cache
+- Controlar alocação de novos blocos
+- Controlar write-back de blocos sujos
+- Gerar requisições para a memória principal
+- Retornar resposta para a CPU
+- Controlar a FSM da cache
+
+`src/main_memory.sv`
+
+Implementa um modelo simplificado de memória principal para simulação.
+
+Esse módulo deve responder às requisições da cache por meio de um sinal ready.
+
+A memória principal trabalha com blocos de 128 bits.
+
+`tb/tb_dm_cache_fsm.sv`
+
+Arquivo de testbench do projeto.
+
+É responsável por:
+
+- Gerar clock
+- Gerar reset
+- Enviar requisições de leitura para a cache
+- Enviar requisições de escrita para a cache
+- Verificar hits
+- Verificar misses
+- Verificar alocação de blocos
+- Verificar substituição de blocos
+- Verificar write-back
+- Gerar arquivo .vcd para visualização no GTKWave
+
+## 🛠️ Ferramentas Utilizadas
+
+O projeto utiliza as seguintes ferramentas:
+
+- `SystemVerilog
+`
+- `Icarus Verilog
+`
+- `GTKWave
+`
+
+---
+
+## 🐧 Instalação no Linux
+
+Para instalar as ferramentas necessárias em distribuições baseadas em Ubuntu/Debian:
+
+```
+sudo apt update
+sudo apt install iverilog gtkwave
+```
+
+Para verificar se a instalação foi concluída corretamente:
+
+```
+iverilog -V
+gtkwave --version
+```
+
+#### Compilação
+
+Para compilar o projeto:
+
+```
+
+iverilog -g2012 -o simv src/\*.sv tb/tb_dm_cache_fsm.sv
+```
+
+#### Execução
+
+```
+vvp simv
+```
+
+#### Visualização da Waveform
+
+Após a execução, o testbench deve gerar um arquivo .vcd.
+
+Para abrir no GTKWave:
+
+```
+gtkwave wave.vcd
+```
+
+Caso o arquivo seja gerado dentro da pasta sim/, use:
+
+```
+gtkwave sim/wave.vcd
+```
+
+---
+
+## 🟦 Uso no Windows
+
+#### Opção recomendada: WSL
+
+A forma mais recomendada de executar o projeto no Windows é usando o WSL.
+
+Para instalar o WSL:
+
+```
+wsl --install
+```
+
+Depois, dentro do Ubuntu/WSL:
+
+```
+sudo apt update
+sudo apt install iverilog gtkwave
+```
+
+Em seguida, compile e execute normalmente:
+```
+iverilog -g2012 -o simv src/\*.sv tb/tb_dm_cache_fsm.sv
+vvp simv
+```
+
+---
+
+## 🧪 Testes Implementados
+
+O testbench deve validar os principais comportamentos esperados do controlador de cache.
+
+Os testes estão organizados nas seguintes categorias:
+
+- Testes de leitura
+- Testes de escrita
+- Testes de substituição
+- Testes de write-back
+- Testes de consistência
+- Testes de casos limite
+
+### Testes de Leitura
+
+#### Leitura com miss inicial
+
+Esse teste verifica o comportamento da cache inicialmente vazia.
+
+Fluxo esperado:
+```
+
+CPU solicita leitura
+Cache detecta miss
+Cache solicita bloco à memória principal
+Memória retorna bloco
+Cache atualiza linha, tag e valid bit
+Cache retorna o dado solicitado à CPU
+
+```
+
+Esse teste valida:
+
+- Cache inicialmente inválida
+- Detecção de miss
+- Alocação de bloco
+- Atualização de tag
+- Atualização de valid bit
+- Retorno correto do dado para a CPU
+
+
+#### Leitura com hit
+
+Esse teste verifica se a cache consegue responder diretamente a uma leitura quando o bloco já está presente.
+
+Fluxo esperado:
+
+```
+
+CPU solicita leitura de um endereço já carregado
+Cache detecta hit
+Cache seleciona a palavra correta dentro do bloco
+Cache retorna o dado para a CPU
+Memória principal não precisa ser acessada
+
+```
+
+Esse teste valida:
+
+- Comparação correta de tag
+- Uso correto do valid bit
+- Seleção correta da palavra pelo offset
+- Resposta rápida em caso de hit
+
+
+#### Leitura em diferentes offsets do mesmo bloco
+
+Esse teste verifica se a cache consegue selecionar corretamente diferentes palavras dentro de um mesmo bloco de 128 bits.
+
+Exemplo:
+
+```
+Endereço base + 0 -> palavra 0
+Endereço base + 4 -> palavra 1
+Endereço base + 8 -> palavra 2
+Endereço base + 12 -> palavra 3
+```
+
+Esse teste valida o uso correto de addr[3:2].
+
+---
+
+## ✍️ Testes de Escrita
+
+#### Escrita com hit
+
+Esse teste verifica o comportamento da cache quando a CPU escreve em um endereço cujo bloco já está carregado.
+
+Fluxo esperado:
+
+```
+CPU solicita escrita
+Cache detecta hit
+Cache atualiza a palavra correta dentro do bloco
+Cache marca dirty bit
+Cache retorna ready para a CPU
+```
+
+Esse teste valida:
+
+- Escrita correta na palavra selecionada
+- Preservação das demais palavras do bloco
+- Atualização do dirty bit
+- Manutenção do valid bit
+- Resposta correta à CPU
+
+#### Escrita com miss
+
+Esse teste verifica o comportamento da cache quando a CPU escreve em um endereço cujo bloco ainda não está carregado.
+
+Como a política usada é write-allocate, o bloco deve ser carregado antes da escrita ser concluída.
+
+Fluxo esperado:
+
+```
+CPU solicita escrita
+Cache detecta miss
+Cache solicita bloco à memória principal
+Memória retorna bloco
+Cache aloca bloco
+Cache realiza a escrita na palavra correta
+Cache marca dirty bit
+Cache retorna ready para a CPU
+```
+
+Esse teste valida:
+
+- Política write-allocate
+- Alocação do bloco antes da escrita
+- Escrita correta após allocate
+- Marcação correta do dirty bit
+
+#### Testes de Substituição
+
+Como a cache é mapeada diretamente, dois endereços diferentes podem mapear para o mesmo índice.
+
+Se esses endereços tiverem tags diferentes, eles competem pela mesma linha da cache.
+
+Exemplo conceitual:
+
+```
+Endereço A -> índice X, tag T1
+Endereço B -> índice X, tag T21
+```
+
+Ao acessar B depois de A, a linha X deve passar a armazenar o bloco de B.
+
+Esse teste valida:
+
+- Cálculo correto do índice
+- Comparação correta da tag
+- Detecção de conflict miss
+- Substituição da linha correta
+
+#### Testes de Write-Back
+
+Esse teste verifica se a cache escreve corretamente um bloco sujo de volta na memória principal antes de substituí-lo.
+
+Fluxo esperado:
+
+```
+Bloco A é carregado na cache
+Bloco A é modificado por uma escrita
+Dirty bit de A é marcado
+Bloco B, com mesmo índice e tag diferente, é acessado
+Cache detecta miss
+Cache percebe que o bloco antigo está dirty
+Cache escreve bloco A na memória principal
+Cache carrega bloco B
+```
+
+Esse teste valida:
+
+- Detecção de bloco sujo
+- Geração correta de requisição de escrita para a memória
+- Uso correto do endereço do bloco antigo
+- Preservação dos dados modificados
+- Substituição correta após write-back
+
+
+#### Testes de Consistência
+
+Os testes de consistência verificam se os dados retornados pela cache são coerentes ao longo de várias operações.
+
+Cenários esperados:
+
+```
+Ler endereço A
+Escrever novo valor em A
+Ler A novamente
+Verificar se o novo valor é retornado
+```
+
+Outro cenário:
+
+```
+Carregar bloco A
+Modificar bloco A
+Acessar bloco B com mesmo índice
+Forçar write-back de A
+Acessar A novamente
+Verificar se o valor modificado foi preservado
+```
+
+Esses testes validam:
+
+- Leitura após escrita
+- Preservação de dados modificados
+- Atualização correta da memória principal após write-back
+- Funcionamento correto em acessos repetidos
+
+#### Testes de Casos Limite
+
+O testbench também deve considerar casos limite, como:
+
+- Cache completamente inválida após reset
+- Primeiro acesso após reset
+- Acesso ao endereço 0x00000000
+- Acessos a endereços altos, se suportados pelo modelo de memória
+- Escritas em palavras diferentes do mesmo bloco
+- Substituição de linha limpa
+- Substituição de linha suja
+- Acessos consecutivos ao mesmo endereço
+- Acessos consecutivos a endereços com mesmo índice e tags diferentes
+
+---
+
+## 🐞 Sinais Importantes para Debug
+
+Durante a simulação, os principais sinais a serem observados são:
+
+#### Sinais gerais
+
+- `clk`
+- `rst`
+
+#### Interface CPU-cache
+
+- `cpu_req.valid`
+- `cpu_req.rw`
+- `cpu_req.addr`
+- `cpu_req.data`
+- `cpu_res.ready`
+- `cpu_res.data`
+
+#### Interface cache-memória
+
+- `mem_req.valid`
+- `mem_req.rw`
+- `mem_req.addr`
+- `mem_req.data`
+- `mem_data.ready`
+- `mem_data.data`
+
+#### FSM
+
+
+- `rstate`
+- `vstate`
+
+#### Tag
+
+- `tag_read.valid`
+- `tag_read.dirty`
+- `tag_read.tag`
+- `tag_write.valid`
+- `tag_write.dirty`
+- `tag_write.tag`
+- `tag_req.index`
+- `tag_req.we`
+
+#### Dados da cache
+
+- `data_read`
+- `data_write`
+- `data_req.index`
+- `data_req.we`
+
+---
+
+## 💡 Interpretação dos Sinais
+
+`cpu_req.valid`
+
+Indica que a CPU está enviando uma requisição válida para a cache.
+
+`cpu_req.rw`
+
+Indica o tipo da operação solicitada pela CPU.
+
+``0 = leitura |
+1 = escrita``
+
+`cpu_res.ready`
+
+Indica que a cache terminou de processar a requisição da CPU.
+
+A CPU só deve considerar o dado válido quando cpu_res.ready == 1.
+
+`mem_req.valid`
+
+Indica que a cache está enviando uma requisição válida para a memória principal.
+
+`mem_req.rw`
+
+Indica o tipo da operação enviada pela cache para a memória.
+
+`0 = leitura da memória |
+1 = escrita na memória`
+
+`mem_data.ready`
+
+Indica que a memória principal terminou a operação solicitada.
+
+`dirty`
+
+Indica que a linha da cache foi modificada e ainda não foi escrita de volta na memória principal.
+
+`valid`
+
+Indica que a linha da cache contém um bloco válido.
+
+---
+
+## 🏆 Comportamento Esperado em Alto Nível
+
+O funcionamento geral do controlador pode ser resumido da seguinte forma:
+
+```
+
+CPU envia uma requisição
+Cache extrai tag, index e offset
+Cache acessa a linha indicada pelo index
+Cache compara a tag armazenada com a tag do endereço
+Cache verifica o valid bit
+
+Se houver hit:
+Se for leitura:
+retorna a palavra solicitada
+Se for escrita:
+atualiza a palavra solicitada
+marca dirty
+retorna ready
+
+Se houver miss:
+Se a linha antiga estiver dirty:
+escreve o bloco antigo na memória principal
+
+    busca o novo bloco na memória principal
+    instala o novo bloco na cache
+    atualiza tag e valid bit
+
+    se a operação original era escrita:
+        escreve a palavra solicitada
+        marca dirty
+
+    retorna ready
+
+```
+
+---
+
+## 📝 Observações sobre o Modelo
+
+Este projeto utiliza uma cache bloqueante.
+
+Isso significa que, enquanto a cache está tratando um miss, a CPU precisa aguardar a conclusão da operação.
+
+Durante esse período, a cache pode precisar esperar a memória principal responder por meio do sinal ready.
+
+Portanto, uma requisição da CPU não necessariamente é concluída em um único ciclo.
+
+---
+
+## 🚫 Possíveis Limitações
+
+Por ser um projeto didático, algumas simplificações podem ser adotadas:
+
+- Apenas uma requisição da CPU por vez
+- Ausência de suporte a múltiplas requisições simultâneas
+- Ausência de cache associativa
+- Ausência de política LRU
+- Ausência de suporte a bytes individuais
+- Ausência de suporte completo a desalinhamento de endereço
+- Memória principal simplificada para simulação
+- Modelo de latência da memória simplificado
+- Cache bloqueante
+
+Essas limitações serão documentadas no relatório final do trabalho.
+
+---
+
+## 📊 Métricas e Evidências da Simulação
+
+O projeto pode gerar evidências por meio de:
+
+- Mensagens $display
+- Logs no terminal
+- Arquivo .vcd
+- Visualização no GTKWave
+- Tabelas no relatório
+- Sequências de testes documentadas
+
+Métricas possíveis:
+
+- Quantidade de leituras
+- Quantidade de escritas
+- Quantidade de hits
+- Quantidade de misses
+- Quantidade de write-backs
+- Quantidade de alocações
+- Quantidade de ciclos por operação
+
+---
+
+## 🎬 Exemplo de Sequência de Teste
+
+```
+
+1. Resetar o sistema
+2. Ler endereço A
+   Resultado esperado: miss + allocate
+
+3. Ler endereço A novamente
+   Resultado esperado: hit
+
+4. Escrever novo valor em A
+   Resultado esperado: hit + dirty = 1
+
+5. Ler endereço A
+   Resultado esperado: hit + valor atualizado
+
+6. Ler endereço B com mesmo índice de A e tag diferente
+   Resultado esperado: miss + write-back de A + allocate de B
+
+7. Ler endereço A novamente
+   Resultado esperado: miss + allocate de A com valor preservado na memória
+
+```
+
+---
+
+## 💬 Uso de IA
+
+O uso de ferramentas de IA será documentado no relatório final.
+
+A documentação deve conter:
+
+- Quais ferramentas foram utilizadas
+- Quais prompts foram usados
+- Em quais partes do projeto a IA auxiliou
+- Quais partes foram revisadas manualmente
+- Quais correções foram feitas pelo grupo
+- Quais decisões técnicas foram tomadas pelos integrantes
+
+---
+
+## 📢 Observação Final
+
+Este projeto foi desenvolvido com finalidade acadêmica para a disciplina Arquitetura de Computadores III.
+
+O principal objetivo é compreender, por meio de simulação, como um controlador de cache opera internamente, incluindo hits, misses, escrita em cache, dirty bit, write-back, alocação de blocos e controle sequencial por FSM.
+
+### 🎓 **Autores**
+
+- **Felipe Pereira da Silva**
+- **Rikerson Antônio Freitas**
+- **Diego Feitosa Ferreira**
+- **Kauan Gabriel Pereira**
+- **Mateus Resende Ottoni**
+
+---
