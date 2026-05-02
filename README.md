@@ -10,7 +10,7 @@ Este projeto tem caráter didático e acadêmico. O objetivo não é implementar
 
 ### ⚠️ **Ponto importante**
 
-O arquivo `rascunho_do_livro.v` <u>***NÃO FAZ***</u> parte do projeto diretamente, portanto o mesmo não compila por ser uma cópia grosseira do conteúdo do livro, servindo apenas para ter um ponto de referência tirado diretamente do livro. 
+O arquivo `rascunho_do_livro.sv` <u>***NÃO FAZ***</u> parte do projeto diretamente, portanto o mesmo não compila por ser uma cópia grosseira do conteúdo do livro, servindo apenas para ter um ponto de referência tirado diretamente do livro. 
 
 ---
 
