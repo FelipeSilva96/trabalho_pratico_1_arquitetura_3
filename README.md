@@ -8,6 +8,10 @@ O foco principal do trabalho é compreender, por meio de implementação prátic
 
 Este projeto tem caráter didático e acadêmico. O objetivo não é implementar uma cache industrial altamente otimizada, mas sim uma cache funcional, organizada e bem documentada, capaz de demonstrar os principais conceitos de hierarquia de memória estudados na disciplina **Arquitetura de Computadores III**.
 
+### ⚠️ **Ponto importante**
+
+O arquivo `rascunho_do_livro.v` <u>***NÃO FAZ***</u> parte do projeto diretamente, portanto o mesmo não compila por ser uma cópia grosseira do conteúdo do livro, servindo apenas para ter um ponto de referência tirado diretamente do livro. 
+
 ---
 
 ## 🧠 Conceitos Envolvidos
@@ -477,8 +481,7 @@ gtkwave --version
 Para compilar o projeto:
 
 ```
-
-iverilog -g2012 -o simv src/\*.sv tb/tb_dm_cache_fsm.sv
+iverilog -g2012 -o simv src/*.sv tb/tb_dm_cache_fsm.sv
 ```
 
 #### Execução
