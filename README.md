@@ -72,15 +72,11 @@ A cache trabalha com endereços de 32 bits.
 
 Como a cache possui 1024 linhas, são necessários 10 bits para selecionar a linha da cache:
 
-```text
-1024 = 2^10
-```
+$\log _2{1024} = 10$
 
 Como cada bloco possui 16 bytes, são necessários 4 bits para selecionar o byte dentro do bloco:
 
-```text
-16 = 2^4
-```
+$\log _2{16} = 4$
 
 Assim, o endereço de 32 bits é dividido da seguinte forma:
 
@@ -171,10 +167,10 @@ Fluxo conceitual:
 
 ```
 Se cpu_req.valid == 0:
-permanecer em IDLE
+    permanecer em IDLE
 
 Se cpu_req.valid == 1:
-ir para COMPARE_TAG
+    ir para COMPARE_TAG
 ```
 
 ### 🔍 Estado COMPARE_TAG
@@ -236,13 +232,13 @@ Se a linha estiver suja, o controlador precisa primeiro escrever o bloco antigo 
 Fluxo conceitual:
 ```
 Se miss e linha inválida:
-ir para ALLOCATE
+    ir para ALLOCATE
 
 Se miss e linha limpa:
-ir para ALLOCATE
+    ir para ALLOCATE
 
 Se miss e linha suja:
-ir para WRITE_BACK
+    ir para WRITE_BACK
 ```
 
 ### 💾 Estado WRITE_BACK
@@ -253,11 +249,13 @@ Uma linha suja contém dados modificados que ainda não foram atualizados na mem
 
 Nesse estado, o controlador:
 
+```
 Monta o endereço do bloco antigo.
 Envia o bloco antigo para a memória principal.
 Solicita uma operação de escrita na memória.
 Aguarda a memória sinalizar ready.
 Após a conclusão da escrita, avança para ALLOCATE.
+```
 
 Fluxo conceitual:
 
@@ -872,16 +870,16 @@ Cache compara a tag armazenada com a tag do endereço
 Cache verifica o valid bit
 
 Se houver hit:
-Se for leitura:
-retorna a palavra solicitada
-Se for escrita:
-atualiza a palavra solicitada
-marca dirty
-retorna ready
+    Se for leitura:
+        retorna a palavra solicitada
+    Se for escrita:
+        atualiza a palavra solicitada
+        marca dirty
+        retorna ready
 
 Se houver miss:
-Se a linha antiga estiver dirty:
-escreve o bloco antigo na memória principal
+    Se a linha antiga estiver dirty:
+        escreve o bloco antigo na memória principal
 
     busca o novo bloco na memória principal
     instala o novo bloco na cache
@@ -1000,9 +998,9 @@ O principal objetivo é compreender, por meio de simulação, como um controlado
 
 ### 🎓 **Autores**
 
-- **Felipe Pereira da Silva**
-- **Rikerson Antônio Freitas**
-- **Diego Feitosa Ferreira**
-- **Kauan Gabriel Pereira**
-- **Mateus Resende Ottoni**
+- [**Felipe Pereira da Silva**](https://github.com/FelipeSilva96)
+- [**Rikerson Antônio Freitas**](https://github.com/HansJung22)
+- [**Diego Feitosa Ferreira**](https://github.com/Sil3ncy)
+- [**Kauan Gabriel Pereira**](https://github.com/KauanHauger02)
+- [**Mateus Resende Ottoni**](https://github.com/Mateus-Resende-Ottoni)
 ---
