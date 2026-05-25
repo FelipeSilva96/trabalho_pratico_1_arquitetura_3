@@ -69,7 +69,7 @@ module dm_cache_fsm (
     // -------------------------------------------------------------------------
     
     
-    always_comb begin
+    always @(*) begin
         // Valores por defeito (Evita a criação de latches indesejados)
         vstate = rstate;
         
