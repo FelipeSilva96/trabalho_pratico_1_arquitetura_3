@@ -3,7 +3,7 @@ import cache_def::*; // Traz as structs do pacote
 
 module tb_cache;
 
-    // 1. Declaração dos Sinais (Usando as structs)
+    //  Declaração dos Sinais (Usando as structs)
     logic clk;
     logic rst;
 
@@ -78,7 +78,7 @@ module tb_cache;
         end
     endtask
 
-    // 6. Bloco Principal de Execução dos Testes
+    //  Bloco Principal de Execução dos Testes
     initial begin
         // Configuração para exportar as formas de onda para o GTKWave
         $dumpfile("ondas_cache.vcd");
