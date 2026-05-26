@@ -3,7 +3,9 @@ import cache_def::*; // Traz as structs do pacote
 
 module tb_cache;
 
-    //  Declaração dos Sinais (Usando as structs)
+    // ---------------------------------------------------------
+    // 1. Declaração dos Sinais Externos (CPU e Memória Principal)
+    // ---------------------------------------------------------
     logic clk;
     logic rst;
 
@@ -13,20 +15,57 @@ module tb_cache;
     mem_req_type    mem_req_out;
     mem_data_type   mem_data_in;
 
-   
-    cache_controller dut (
+    // ---------------------------------------------------------
+    // 2. Declaração dos Sinais Internos (Fios entre FSM e SRAMs)
+    // ---------------------------------------------------------
+    cache_data_type data_read, data_write;
+    cache_req_type  data_req, tag_req;
+    cache_tag_type  tag_read, tag_write;
+
+    // ---------------------------------------------------------
+    // 3. Instanciação dos Módulos do Projeto
+    // ---------------------------------------------------------
+    
+    // Controlador FSM
+    dm_cache_fsm fsm_inst (
         .clk(clk),
         .rst(rst),
         .cpu_req(cpu_req_in),
         .cpu_res(cpu_res_out),
         .mem_data(mem_data_in),
-        .mem_req(mem_req_out)
+        .mem_req(mem_req_out),
+        .data_read(data_read),
+        .data_write(data_write),
+        .data_req(data_req),
+        .tag_read(tag_read),
+        .tag_write(tag_write),
+        .tag_req(tag_req)
     );
 
-    // Geração de Clock (Período de 10ns)
+    // Memória de Dados
+    dm_cache_data data_inst (
+        .clk(clk),
+        .data_req(data_req),
+        .data_write(data_write),
+        .data_read(data_read)
+    );
+
+    // Memória de Tags
+    dm_cache_tag tag_inst (
+        .clk(clk),
+        .tag_req(tag_req),
+        .tag_write(tag_write),
+        .tag_read(tag_read)
+    );
+
+    // ---------------------------------------------------------
+    // 4. Geração de Clock (Período de 10ns)
+    // ---------------------------------------------------------
     always #5 clk = ~clk;
 
-    // Simulação do comportamento da Memória Principal
+    // ---------------------------------------------------------
+    // 5. Simulação do comportamento da Memória Principal
+    // ---------------------------------------------------------
     always @(posedge clk) begin
         // Valores por padrão
         mem_data_in.ready <= 1'b0;
@@ -43,7 +82,10 @@ module tb_cache;
         end
     end
 
-    // Tasks Auxiliares
+    // ---------------------------------------------------------
+    // 6. Tasks Auxiliares
+    // ---------------------------------------------------------
+    
     // Task para simular uma LEITURA da CPU
     task cpu_read(input logic [31:0] addr);
         begin
@@ -61,7 +103,7 @@ module tb_cache;
         end
     endtask
 
-    // Task para simular uma ESCRITA da CPU (Atualizada para usar Structs)
+    // Task para simular uma ESCRITA da CPU
     task cpu_write(input logic [31:0] addr, input logic [31:0] data);
         begin
             @(posedge clk);
@@ -78,7 +120,9 @@ module tb_cache;
         end
     endtask
 
-    //  Bloco Principal de Execução dos Testes
+    // ---------------------------------------------------------
+    // 7. Bloco Principal de Execução dos Testes
+    // ---------------------------------------------------------
     initial begin
         // Configuração para exportar as formas de onda para o GTKWave
         $dumpfile("ondas_cache.vcd");
