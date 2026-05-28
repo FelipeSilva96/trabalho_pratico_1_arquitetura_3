@@ -46,17 +46,16 @@ package cache_def;
   parameter int WORDS_PER_BLOCK = 4;
   parameter int BLOCK_BITS = WORD_BITS * WORDS_PER_BLOCK;
 
+  // dados da memoria principal
+  parameter int MAIN_MEM_LINES = 4294967296
+  parameter int MAIN_MEM_BITS = 32
+
   // ---------------------------------------------------------------------------
   // Tipos basicos
   // ---------------------------------------------------------------------------
 
   // Linha/bloco de dados da cache: 128 bits.
-  //typedef bit [BLOCK_BITS-1:0] cache_data_type;
-  //  Aqui abrimos mão da dinamicidade de estabelecer o tamanho via o tamanho do bloco
-  // pois o verilog reclama de tentar estabelecer dinamicamente o tamanho disso.
-  //  Não é impossível definir com base em uma variável, mas não descobri uma maneira
-  // fácil, então decide que não vale a pena a considerar o escopo desse projeto.
-  typedef bit [127:0] cache_data_type;
+  typedef bit [BLOCK_BITS-1:0] cache_data_type;
 
   // Entrada da memoria de tags da cache.
   // Cada linha possui:
