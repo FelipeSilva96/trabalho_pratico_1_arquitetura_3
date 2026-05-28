@@ -51,7 +51,12 @@ package cache_def;
   // ---------------------------------------------------------------------------
 
   // Linha/bloco de dados da cache: 128 bits.
-  typedef bit [BLOCK_BITS-1:0] cache_data_type;
+  //typedef bit [BLOCK_BITS-1:0] cache_data_type;
+  //  Aqui abrimos mão da dinamicidade de estabelecer o tamanho via o tamanho do bloco
+  // pois o verilog reclama de tentar estabelecer dinamicamente o tamanho disso.
+  //  Não é impossível definir com base em uma variável, mas não descobri uma maneira
+  // fácil, então decide que não vale a pena a considerar o escopo desse projeto.
+  typedef bit [127:0] cache_data_type;
 
   // Entrada da memoria de tags da cache.
   // Cada linha possui:
