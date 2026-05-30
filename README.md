@@ -360,7 +360,9 @@ trabalho_pratico_1_arquitetura_3/
 │ └── tb_dm_cache.sv
 │
 ├── sim/
+│ └── sim_cache.cpp
 │ └── wave.vcd
+│
 ├── rascunho_do_livro.sv
 └── README.md
 ```
@@ -443,6 +445,10 @@ Arquivo de testbench do projeto.
 - Verificar write-back
 - Gerar arquivo .vcd para visualização no GTKWave
 
+`sim/sim_cache.cpp`
+
+Arquivo para compilação do projeto via Verilator
+
 ---
 
 ## 🛠️ Ferramentas Utilizadas
@@ -450,6 +456,8 @@ Arquivo de testbench do projeto.
 O projeto utiliza as seguintes ferramentas:
 
 - `SystemVerilog
+`
+- `Verilator
 `
 - `Icarus Verilog
 `
@@ -465,6 +473,7 @@ Para instalar as ferramentas necessárias em distribuições baseadas em Ubuntu/
 ```
 sudo apt update
 sudo apt install iverilog gtkwave
+apt-get install verilator
 ```
 
 Para verificar se a instalação foi concluída corretamente:
@@ -472,21 +481,32 @@ Para verificar se a instalação foi concluída corretamente:
 ```
 iverilog -V
 gtkwave --version
+verilator --version
 ```
+
 
 #### Compilação
 
 Para compilar o projeto:
 
+Via Icarus Verilog:
 ```
 iverilog -g2012 -o simv src/*.sv tb/tb_dm_cache.sv
 ```
 
+Via Verilator:
+```
+make
+```
+
 #### Execução
 
+Via Icarus Verilog:
 ```
 vvp simv
 ```
+
+Via Verilator a execução será realizada junto à compilação
 
 #### Visualização da Waveform
 
