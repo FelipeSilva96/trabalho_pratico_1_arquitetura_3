@@ -352,16 +352,16 @@ trabalho_pratico_1_arquitetura_3/
 ├── src/
 │ ├── cache_def.sv
 │ ├── dm_cache_data.sv
-│ ├── dm_cache_tag.sv
 │ ├── dm_cache_fsm.sv
+│ ├── dm_cache_tag.sv
 │ └── main_memory.sv
 │
 ├── tb/
-│ └── tb_dm_cache_fsm.sv
+│ └── tb_dm_cache.sv
 │
 ├── sim/
 │ └── wave.vcd
-│ └── rascunho_do_livro.sv
+├── rascunho_do_livro.sv
 └── README.md
 ```
 
@@ -426,7 +426,7 @@ Esse módulo deve responder às requisições da cache por meio de um sinal read
 
 A memória principal trabalha com blocos de 128 bits.
 
-`tb/tb_dm_cache_fsm.sv`
+`tb/tb_dm_cache.sv`
 
 Arquivo de testbench do projeto.
 
@@ -479,7 +479,7 @@ gtkwave --version
 Para compilar o projeto:
 
 ```
-iverilog -g2012 -o simv src/*.sv tb/tb_dm_cache_fsm.sv
+iverilog -g2012 -o simv src/*.sv tb/tb_dm_cache.sv
 ```
 
 #### Execução
@@ -527,7 +527,7 @@ sudo apt install iverilog gtkwave
 
 Em seguida, compile e execute normalmente:
 ```
-iverilog -g2012 -o simv src/\*.sv tb/tb_dm_cache_fsm.sv
+iverilog -g2012 -o simv src/\*.sv tb/tb_dm_cache.sv
 vvp simv
 ```
 
