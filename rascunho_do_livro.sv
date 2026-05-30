@@ -80,7 +80,7 @@ module dm_cache_data(input bit clk,
     output cache_data_type data_read);  //read port
 
     timeunit 1ns; timeprecision 1ps;
-    cache_data_typedata_mem[0:1023];
+    cache_data_type data_mem[0:1023];
 
     initial begin
         for (int i=0; i<1024; i++)
@@ -110,7 +110,7 @@ module dm_cache_tag(input bit clk,      //write clock
     output cache_tag_type tag_read);    //read port
     
     timeunit 1ns; timeprecision 1ps;
-    cache_tag_typetag_mem[0:1023];
+    cache_tag_type tag_mem[0:1023];
 
     initial begin
         for (int i=0; i<1024; i++)
@@ -147,19 +147,19 @@ module dm_cache_fsm(input bit clk, input bit rst,
     typedef enum {idle, compare_tag, allocate, write_back} cache_state_type;
 
     /*FSM state register*/
-    cache_state_typevstate, rstate;
+    cache_state_type vstate, rstate;
     /*interface signals to tag memory*/
-    cache_tag_typetag_read;     //tag read result
-    cache_tag_typetag_write;    //tag write data
-    cache_req_typetag_req;      //tag request
+    cache_tag_type tag_read;     //tag read result
+    cache_tag_type tag_write;    //tag write data
+    cache_req_type tag_req;      //tag request
     /*interface signals to cache data memory*/
-    cache_data_typedata_read;   //cache line read data
-    cache_data_typedata_write;  //cache line write data
-    cache_req_typedata_req;     //data req
+    cache_data_type data_read;   //cache line read data
+    cache_data_type data_write;  //cache line write data
+    cache_req_type data_req;     //data req
     /*temporary variable for cache controller result*/
-    cpu_result_typev_cpu_res;
+    cpu_result_type v_cpu_res;
     /*temporary variable for memory controller request*/
-    mem_req_typev_mem_req;
+    mem_req_type v_mem_req;
 
     assign mem_req = v_mem_req; //connect to output ports
     assign cpu_res = v_cpu_res;
