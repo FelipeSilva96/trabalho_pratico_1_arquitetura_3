@@ -16,7 +16,9 @@
 
 `timescale 1ns/1ps
 
+/* verilator lint_off IMPORTSTAR */
 import cache_def::*;
+/* verilator lint_on IMPORTSTAR */
 
 module dm_cache_tag (
   input  bit            clk,

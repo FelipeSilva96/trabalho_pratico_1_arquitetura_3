@@ -1,5 +1,7 @@
 `timescale 1ns/1ps
-import cache_def::*; // Traz as structs do pacote
+/* verilator lint_off IMPORTSTAR */
+import cache_def::*;
+/* verilator lint_on IMPORTSTAR */
 
 module tb_dm_cache;
 
@@ -9,12 +11,16 @@ module tb_dm_cache;
     logic clk;
     logic rst;
 
+    /* verilator lint_off UNUSEDSIGNAL */
     bit [3:0] test_instruction_number;
+    /* verilator lint_on UNUSEDSIGNAL */
 
     cpu_req_type    cpu_req_in;
     cpu_result_type cpu_res_out;
     
+    /* verilator lint_off UNUSEDSIGNAL */
     mem_req_type    mem_req_out;
+    /* verilator lint_on UNUSEDSIGNAL */
     mem_data_type   mem_data_in;
 
     // ---------------------------------------------------------
@@ -127,13 +133,14 @@ module tb_dm_cache;
     // ---------------------------------------------------------
     initial begin
         // Configuração para exportar as formas de onda para o GTKWave
-        $dumpfile("ondas_cache.vcd");
-        $dumpvars(0, tb_dm_cache);
+        //$dumpfile("ondas_cache.vcd");
+        //$dumpvars(0, tb_dm_cache);
 
         // Inicialização dos sinais e Reset
         $display("--- INICIANDO SIMULACAO ---");
         clk = 0;
         rst = 1;
+       //$display("clock and reset set");
         
         // Zera a struct de requisição inicial
         cpu_req_in.valid = 1'b0;
@@ -141,6 +148,15 @@ module tb_dm_cache;
         cpu_req_in.addr  = 32'd0;
         cpu_req_in.data  = 32'd0;
         
+        //$display("teste");
+        //#1 $display("--- 1ns ---");
+        //#1 $display("--- 2ns ---");
+        //#1 $display("--- 3ns ---");
+        //#1 $display("--- 4ns ---");
+        //#1 $display("--- 5ns ---");
+        //#5 $display("--- 10ns ---");
+        //#5 $display("--- 15ns ---");
+        //#5 rst = 0; // Libera o reset após 20ns
         #20 rst = 0; // Libera o reset após 20ns
         $display("[%0t] Reset liberado. Cache inicializada.", $time);
 

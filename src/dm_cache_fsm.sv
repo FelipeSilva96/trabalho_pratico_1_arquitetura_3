@@ -1,6 +1,8 @@
 `timescale 1ns/1ps
 
+/* verilator lint_off IMPORTSTAR */
 import cache_def::*;
+/* verilator lint_on IMPORTSTAR */
 
 module dm_cache_fsm (
     input  logic           clk, // Clock
@@ -40,7 +42,9 @@ module dm_cache_fsm (
     assign req_idx = cpu_req.addr[13:4];
 
     // Sinal auxiliar para detetar Hit
+    /* verilator lint_off UNOPTFLAT */
     logic hit;
+    /* verilator lint_on UNOPTFLAT */
     assign hit = (tag_read.valid && (tag_read.tag == req_tag));
 
     // -------------------------------------------------------------------------

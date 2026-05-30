@@ -16,6 +16,8 @@
 // - offset de 4 bits;
 // - politica write-back com write-allocate.
 
+`timescale 1ns/1ps
+
 package cache_def;
 
 
@@ -30,16 +32,20 @@ package cache_def;
 
   // Bits do indice da cache.
   // 1024 linhas = 2^10, logo o indice possui 10 bits.
+  /* verilator lint_off UNUSEDPARAM */
   parameter int INDEXMSB = 13;
   parameter int INDEXLSB = 4;
   parameter int INDEX_BITS = 10;
+  /* verilator lint_off UNUSEDPARAM */
   parameter int CACHE_LINES = 1024;
 
   // Bits de offset dentro do bloco.
   // Cada bloco tem 16 bytes = 2^4, logo o offset possui 4 bits.
+  /* verilator lint_off UNUSEDPARAM */
   parameter int OFFSETMSB = 3;
   parameter int OFFSETLSB = 0;
   parameter int OFFSET_BITS = 4;
+  /* verilator lint_off UNUSEDPARAM */
 
   // Cada bloco possui 4 palavras de 32 bits.
   parameter int WORD_BITS = 32;
@@ -66,8 +72,8 @@ package cache_def;
   typedef struct packed {
     bit valid;
     bit dirty;
-    //bit [TAGMSB:TAGLSB] tag;
-    bit [31:14] tag;
+    bit [TAGMSB:TAGLSB] tag;
+    //bit [31:14] tag;
   } cache_tag_type;
 
   // Requisicao interna para acessar a memoria de dados ou de tags da cache.
