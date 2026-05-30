@@ -137,7 +137,7 @@ module tb_dm_cache;
         //$dumpvars(0, tb_dm_cache);
 
         // Inicialização dos sinais e Reset
-        $display("--- INICIANDO SIMULACAO ---");
+        $display("\n\n--- INICIANDO SIMULACAO ---");
         clk = 0;
         rst = 1;
        //$display("clock and reset set");
@@ -162,26 +162,35 @@ module tb_dm_cache;
 
         // --- INÍCIO DOS CENÁRIOS DE TESTE ---
 
-        $display("\n--- Teste 7.1: Leitura de endereco vazio (Miss) ---");
+        $display("\n\n--- Teste 7.1: Leitura de endereco vazio (Miss) ---");
         // Vai ler o endereço. Como está vazio, vai na memória buscar. 
         // A memória deve devolver a palavra correspondente ao final do bloco (AAAAAAAA, BBBBBBBB, etc).
         test_instruction_number = 4'd1;
         cpu_read(32'h0000_1004); 
 
-        $display("\n--- Teste 7.1: Leitura do mesmo endereco (Hit) ---");
+        $display("\n\n--- Teste 7.1: Leitura do mesmo endereco (Hit) ---");
         // O dado agora deve estar na cache, resolvendo em 1 ou 2 ciclos sem ir na memória.
         test_instruction_number = 4'd2;
         cpu_read(32'h0000_1004);
 
-        $display("\n--- Teste 7.2: Escrita no mesmo endereco (Hit Write) ---");
+        $display("\n\n--- Teste 7.2: Escrita no mesmo endereco (Hit Write) ---");
         // Vai sobrescrever a palavra que estava lá pelo valor DEADBEEF e marcar o Dirty bit como 1.
         test_instruction_number = 4'd3;
         cpu_write(32'h0000_1004, 32'hDEADBEEF);
 
+        $display("\n\n--- Teste 7.3: Escrita em endereco ocupado (Substituicao) ---");
+        test_instruction_number = 4'd4;
+
+        $display("\n\n--- Teste 7.4: Consistencia em acesso ---");
+        test_instruction_number = 4'd5;
+
+        $display("\n\n--- Teste 7.5: Casos Limite ---");
+        test_instruction_number = 4'd6;
+
         // Finaliza a simulação
         #50;
-        test_instruction_number = 4'd4;
-        $display("\n--- SIMULACAO FINALIZADA ---");
+        test_instruction_number = 4'd7;
+        $display("\n\n--- SIMULACAO FINALIZADA ---\n\n");
         $finish;
     end
 
