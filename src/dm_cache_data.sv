@@ -42,6 +42,7 @@ module dm_cache_data (
   // ---------------------------------------------------------------------------
 
   cache_data_type data_mem [0:CACHE_LINES-1];
+  //cache_data_type data_mem [0:1023];
 
   // ---------------------------------------------------------------------------
   // Inicializacao da memoria de dados
@@ -49,6 +50,7 @@ module dm_cache_data (
  
   initial begin
     for (int i = 0; i < CACHE_LINES; i++) begin
+    //for (int i = 0; i < 1024; i++) begin
       data_mem[i] = '0;
     end
   end
@@ -77,7 +79,7 @@ module dm_cache_data (
   // Mesmo quando apenas uma palavra de 32 bits é modificada, o controlador monta previamente o bloco completo atualizado em data_write.
   // ---------------------------------------------------------------------------
 
-  always_ff @(posedge clk) begin
+  always @(posedge clk) begin
     if (data_req.we) begin
       data_mem[data_req.index] <= data_write;
     end

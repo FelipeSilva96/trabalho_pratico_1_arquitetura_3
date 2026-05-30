@@ -40,6 +40,7 @@ module dm_cache_tag (
   // ---------------------------------------------------------------------------
 
   cache_tag_type tag_mem [0:CACHE_LINES-1];
+  //cache_tag_type tag_mem [0:1023];
 
   // ---------------------------------------------------------------------------
   // Inicializacao da memoria de tags
@@ -57,6 +58,7 @@ module dm_cache_tag (
 
   initial begin
     for (int i = 0; i < CACHE_LINES; i++) begin
+    //for (int i = 0; i < 1024; i++) begin
       tag_mem[i] = '0;
     end
   end
@@ -91,7 +93,7 @@ module dm_cache_tag (
   // Esse comportamento segue o modelo do livro, no qual a entrada de tag é tratada como uma estrutura unica. Portanto, mesmo quando apenas o dirty bit muda, a FSM escreve novamente a entrada completa.
   // ---------------------------------------------------------------------------
 
-  always_ff @(posedge clk) begin
+  always @(posedge clk) begin
     if (tag_req.we) begin
       tag_mem[tag_req.index] <= tag_write;
     end

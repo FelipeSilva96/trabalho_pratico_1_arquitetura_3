@@ -3,8 +3,10 @@
 import cache_def::*;
 
 module dm_cache_fsm (
-    input  logic           clk,
-    input  logic           rst,
+    input  logic           clk, // Clock
+    input  logic           rst, // Reset
+    //input  bit           clk, // Clock
+    //input  bit           rst, // Reset
 
     // Interface CPU <-> Cache
     input  cpu_req_type    cpu_req,
@@ -70,7 +72,7 @@ module dm_cache_fsm (
     
     
     always @(*) begin
-        // Valores por defeito (Evita a criação de latches indesejados)
+        // Valores por padrão (Evita a criação de latches indesejados)
         vstate = rstate;
         
         cpu_res.ready = 1'b0;
@@ -83,11 +85,11 @@ module dm_cache_fsm (
         
         data_req.we    = 1'b0;
         data_req.index = req_idx;
-        data_write     = data_read; // Mantém o dado atual por defeito
+        data_write     = data_read; // Mantém o dado atual por padrão
         
         tag_req.we     = 1'b0;
         tag_req.index  = req_idx;
-        tag_write      = tag_read;  // Mantém a tag atual por defeito
+        tag_write      = tag_read;  // Mantém a tag atual por padrão
 
         case (rstate)
             // =================================================================
@@ -163,6 +165,8 @@ module dm_cache_fsm (
                     // Memória confirmou a escrita. Agora podemos alocar o novo bloco.
                     vstate = ALLOCATE;
                 end
+                //  Se mem_data.ready == 0, então o vstate deve ser igual a WRITE_BACK,
+                // que já foi feito pois o padrão é copiar o estado atual para o próximo
             end
 
             // =================================================================
@@ -188,6 +192,9 @@ module dm_cache_fsm (
                     // Com o bloco novo na cache, volta para comparar e dar o Hit!
                     vstate = COMPARE_TAG;
                 end
+                //  Se mem_data.ready == 0, então o vstate deve ser igual a ALLOCATE,
+                // que já foi feito pois o padrão é copiar o estado atual para o próximo
+
             end
         endcase
     end

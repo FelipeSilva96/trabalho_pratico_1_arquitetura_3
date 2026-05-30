@@ -66,14 +66,16 @@ package cache_def;
   typedef struct packed {
     bit valid;
     bit dirty;
-    bit [TAGMSB:TAGLSB] tag;
+    //bit [TAGMSB:TAGLSB] tag;
+    bit [31:14] tag;
   } cache_tag_type;
 
   // Requisicao interna para acessar a memoria de dados ou de tags da cache.
   // O campo index seleciona uma das 1024 linhas.
   // O campo we habilita escrita quando vale 1.
   typedef struct packed {
-    bit [INDEX_BITS-1:0] index;
+    //bit [INDEX_BITS-1:0] index;
+    bit [9:0] index;
     bit we;
   } cache_req_type;
 
