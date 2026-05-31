@@ -70,7 +70,7 @@ module tb_dm_cache;
     // ---------------------------------------------------------
     // 4. Geração de Clock (Período de 10ns)
     // ---------------------------------------------------------
-    always #5 clk = ~clk;
+    always #5 clk <= ~clk;
 
     // ---------------------------------------------------------
     // 5. Simulação do comportamento da Memória Principal
