@@ -1,79 +1,78 @@
-/*
----------------------------------------------------------------------------------------------
-Neste arquivo encontra se o modelo para a memoria principal da maquina que estamos simulando
----------------------------------------------------------------------------------------------
-Esse módulo deve responder às requisições da cache por meio de um sinal ready.
-A memória principal trabalha com blocos de 128 bits. 
----------------------------------------------------------------------------------------------
-
----------------------------------------------------------------------------------------------
-Uma requisicao de acesso a memoria e definida por:
-=>32 bits de endereco => 4.294.967.296 endereços distintos
-=>cada palavra na memoria principal possui 32 bits 
-=>128 bits de dados
-=>ao buscar um dado na memoria principal, resgatamos os dados do endereço especifico + 3 seguintes = 128 bits de dados
----------------------------------------------------------------------------------------------
-*/
 `timescale 1ns/1ps
 
 /* verilator lint_off IMPORTSTAR */
 import cache_def::*;
 /* verilator lint_on IMPORTSTAR */
 
-
-module main_memory (
-    input bit clk,
-    input mem_req_type mem_req, //requisicao do controlador para a memoria
-    output mem_data_type mem_data //resposta da memoria contendo bit ready e os 128 bits de dados lidos
+module main_memory #(
+    parameter int LATENCY = 10 
+)(
+    input  logic           clk,
+    input  mem_req_type    mem_req,  
+    output mem_data_type   mem_data  
 );
 
-    // 1028 * 262144 = 2^18 = 268435456
-    //  Para não gerar um programa excessivamente grande, diminuímos para haver apenas 8 endereços por
-    // índice, já que uma memória completa não é parte do escopo desse projeto
-    parameter int NTAGS = 8;
-    parameter int NADDR = 8224;
-    typedef cache_data_type [NADDR:0] memory_data;
+    // 1. Armazenamento Esparso (Array Associativo)
+    cache_data_type memory_array [int];
 
+    // 2. Máquina de Estados Interna para simular Latência
+    typedef enum logic [1:0] {IDLE, WAIT_LATENCY, RESPOND} state_t;
+    state_t state = IDLE;
 
-    memory_data memory_storage;
-    /* verilator lint_off UNUSEDSIGNAL */
-    logic [17:0] req_tag;
-    /* verilator lint_on UNUSEDSIGNAL */
-    logic [9:0]  req_idx;
-    integer request_idx;
-    integer request_tag;
-    int mem_addr;
-
-    assign mem_data.data = memory_storage[mem_addr];
-
-    initial begin
-        for (int i = 0; i < NADDR; i++) begin
-            memory_storage[i] = 128'd0;
-        end
-    end
-
-    always @(posedge clk) begin
-        if (mem_req.valid == 1'b1) begin
-            mem_data.ready <= 1'b0;
-
-            req_tag <= mem_req.addr[31:14];
-            req_idx <= mem_req.addr[13:4];
-
-            /* verilator lint_off WIDTHEXPAND */
-            request_idx <= req_idx;
-            request_tag <= req_tag;
-            /* verilator lint_on WIDTHEXPAND */
-
-            mem_addr <= (request_idx * NTAGS) + (request_tag%NTAGS);
-            if (mem_req.rw == 1'b0) begin // Leitura
-                // Lógica para lidar com dirty bit
-            end
-            else begin // Escrita
-                memory_storage[mem_addr] <= mem_req.data;
-                //$display("Escrito %h na memória no endereço %d", mem_req.data, mem_addr);
-            end
-            mem_data.ready <= 1'b1;
-        end
-    end
+    int counter;
     
+    // Ajuste de largura para 32 bits para casar com a chave [int] e evitar WIDTHTRUNC/EXPAND
+    bit [31:0] block_addr;
+    assign block_addr = {4'b0000, mem_req.addr[31:4]};
+
+    // 3. Lógica Sequencial da Memória
+    always_ff @(posedge clk) begin
+        // Valor padrão da saída (Evita latches e resolve o erro BLKANDNBLK)
+        // Toda a struct mem_data agora é controlada de forma não-bloqueante (<=)
+        mem_data.ready <= 1'b0;
+
+        case (state)
+            IDLE: begin
+                if (mem_req.valid) begin
+                    state   <= WAIT_LATENCY;
+                    counter <= LATENCY;
+                end
+            end
+
+            WAIT_LATENCY: begin
+                if (counter > 0) begin
+                    counter <= counter - 1; 
+                end else begin
+                    if (mem_req.rw == 1'b1) begin
+                        // ESCRITA
+                        // Silencia o aviso BLKSEQ para manipulação segura de array dinâmico
+                        /* verilator lint_off BLKSEQ */
+                        memory_array[block_addr] = mem_req.data;
+                        /* verilator lint_on BLKSEQ */
+                    end else begin
+                        // LEITURA
+                        // exists() retorna int. A comparação '== 0' evita WIDTHTRUNC do operador '!'
+                        if (memory_array.exists(block_addr) == 0) begin
+                            /* verilator lint_off BLKSEQ */
+                            memory_array[block_addr] = 128'h0;
+                            /* verilator lint_on BLKSEQ */
+                        end
+                        mem_data.data <= memory_array[block_addr];
+                    end
+                    
+                    // Dispara o sinal de pronto
+                    mem_data.ready <= 1'b1;
+                    state <= RESPOND;
+                end
+            end
+
+            RESPOND: begin
+                // mem_data.ready cai para 0 naturalmente pelo estado padrão (default) no topo
+                state <= IDLE;
+            end
+
+            default: state <= IDLE;
+        endcase
+    end
+
 endmodule
