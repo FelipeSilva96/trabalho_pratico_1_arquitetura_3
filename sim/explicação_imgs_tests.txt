@@ -1,8 +1,43 @@
 teste 1.1:
 A CPU pediu algo (cpu_req.valid=1), o Cache não tinha (hit=0), então a FSM travou no estado de alocação (rstate=2) e pediu ajuda à Memória (mem_req.valid=1). A Memória demorou 10 ciclos até finalmente responder (mem_data.ready=1). Só então a Cache salvou o dado, confirmou o Hit e liberou a CPU dando um pulso rápido (cpu_res.ready=1).
 
+
 teste 1.2:
 A CPU pediu um endereço que acabou de ser carregado (cpu_req.valid=1). A Cache olhou em sua memória de tags e viu que o bloco já estava lá (hit=1). Com isso, a FSM não precisou entrar em pânico: ela resolveu tudo no próprio estado de comparação (rstate=1), ignorou completamente a Memória Principal (deixando mem_req.valid=0 e mem_data.ready=0 adormecidos) e liberou a CPU quase instantaneamente, dando um pulso rápido de confirmação (cpu_res.ready=1)
 
+
 teste 2.1:
 A CPU mandou um novo dado para ser salvo (cpu_req.valid=1, cpu_req.rw=1) em um endereço que já estava guardado na cache. A FSM acordou, foi para o estado de checagem (rstate=1) e confirmou o acerto (hit=1). Como a sua arquitetura usa a política de Write-Back, a FSM foi extremamente eficiente: ela apenas substituiu a palavra dentro da própria SRAM da cache e marcou a linha como 'suja' (dirty), tudo isso em um piscar de olhos. Ela não precisou incomodar a Memória Principal (que continuou em silêncio absoluto com mem_req.valid=0) e já disparou o sinal de pronto para liberar a CPU (cpu_res.ready=1)
+
+
+teste 2.2:
+A CPU ordena uma nova escrita (cpu_req.valid=1, cpu_req.rw=1) no endereço 0x00011004. A FSM entra no estado de checagem (rstate=1) e descobre um Miss Espacial: o índice 0x100 já está ocupado por uma Tag antiga diferente, e pior, essa linha está modificada (dirty=1). O sinal cpu_res.ready despenca e fica congelado em 0. A FSM entra em ação para salvar o hardware anterior: ela pula para o estado de Write-Back (rstate=3), ativa o barramento de memória para gravação (mem_req.valid=1, mem_req.rw=1) e espera pacientemente 10 ciclos pela RAM real (mem_data.ready). Assim que a RAM aceita o bloco velho, a FSM salta imediatamente para o estado de Allocate (rstate=2), vira o barramento para leitura (mem_req.rw=0) e espera mais 10 ciclos pelo bloco novo. Somente após essa jornada síncrona dupla à memória principal é que a FSM atualiza as SRAMs locais e dispara o pulso final de vitória para liberar a CPU (cpu_res.ready=1).
+
+
+teste 2.3:
+A CPU manda escrever um dado (cpu_req.valid=1, cpu_req.rw=1) no endereço 0x00001014. A FSM vai para a checagem (rstate=1) e percebe um Miss. No entanto, a linha atual desse índice na cache está 'limpa' (dirty=0) ou inválida. Como não há dados velhos para salvar, a FSM pula o estado de Write-Back e vai direto para Allocate (rstate=2). Ela aciona a memória principal em modo de leitura (mem_req.rw=0), espera 10 ciclos pelo bloco novo, atualiza a palavra na SRAM, altera o bit para sujo e, por fim, dispara o pulso de liberação para a CPU (cpu_res.ready=1).
+
+
+teste 3.1:
+A CPU pede para ler o endereço 0x00001010. A FSM dá um Hit imediato (hit=1), mesmo sem esse endereço ter sido acessado antes! Por quê? Porque ele pertence ao mesmo bloco de 16 bytes trazido no Teste 2.3 (1014). Em seguida, a CPU escreve e lê novamente no mesmo local, gerando mais pulsos rápidos de Hit. Então, a CPU pede o endereço 0x00003010. A FSM dá um Miss Limpo, vai para Allocate (rstate=2) e aciona a memória para leitura. O cpu_res.ready fica em 0 por ~17 ciclos. Por fim, a CPU lê o 1010 original novamente, e a FSM dá Hit imediato. Isso prova visualmente que o bloco 3010 (índice 0x301) ocupou uma linha diferente do 1010 (índice 0x101), não ejetando o dado anterior.
+
+
+teste 3.2:
+A CPU inicia ordenando uma escrita no endereço inédito 0x00001020 (cpu_req.valid=1, cpu_req.rw=1). A FSM acusa um Miss, vai para Allocate (rstate=2) e busca o bloco na memória principal, gerando um 'apagão' de ~17 ciclos no sinal de pronto da CPU. Logo após concluir essa escrita longa, a CPU entra num laço e dispara uma 'metralhadora' de 4 pedidos de leitura consecutivos exatamente para esse mesmo endereço (cpu_req.rw=0). Visualmente, você verá a consagração do Cache Hit repetido: a FSM bate no estado COMPARE_TAG (rstate=1) e volta para IDLE, enquanto o sinal cpu_res.ready dispara 4 pulsos finos, rítmicos e perfeitamente espaçados por apenas 2 ciclos de clock cada. Durante esse bombardeio de leituras, a memória principal permanece em silêncio absoluto.
+
+
+teste 3.3:
+1-A CPU escreve no endereço 0x00001030. A FSM dá Miss Limpo e faz apenas um Allocate (apagão médio).
+2-A CPU escreve em 0x00011030. O índice é o mesmo (0x103), mas a Tag é diferente. Como o bloco anterior tinha acabado de ser escrito (estava Dirty), a FSM ejeta a linha para a memória e puxa a nova (apagão gigante de Write-Back + Allocate).
+3-A CPU pede para ler o primeiro endereço (0x00001030) de volta. Novo conflito! Como o segundo endereço também estava Dirty (foi uma escrita), a FSM sofre outro apagão gigante (Write-Back + Allocate).
+4-Por fim, a CPU pede para ler o segundo endereço (0x00011030) mais uma vez. Mais um conflito! Porém, como a operação anterior foi apenas uma leitura, o bloco a ser ejetado está Limpo. A FSM é inteligente, pula o Write-Back e faz apenas o Allocate. O último apagão volta a ser médio
+
+
+teste 4:
+a CPU exige o primeiro endereço possível (0x00000000) e, em seguida, o último endereço possível (0xFFFFFFFF). Visualmente, o GTKWave exibirá um padrão perfeitamente simétrico formado por duas duplas de operações. A CPU solicita uma escrita no endereço zerado, resultando em um "apagão" médio no sinal de ready (~17 ciclos) enquanto a FSM aloca o bloco. Logo em seguida, a CPU lê o mesmo endereço, gerando um Hit imediato (pulso rápido de 2 ciclos). O padrão exato se repete logo depois: um apagão médio para alocar o bloco do endereço máximo (todos os bits em 1), seguido de um Hit instantâneo de leitura. A memória principal é acionada apenas duas vezes, estritamente para leitura dos novos blocos.
+
+teste 5a:
+Ela demonstra a estabilidade e a regularidade do circuito sob estresse contínuo. cpu_req.rw forma uma linha reta horizontal contínua em nível alto (1), provando que o laço executa apenas escritas. cpu_res.ready se transforma em um "pente" perfeito e uniforme de pulsos. A densidade constante e a ausência de lacunas vazias ou travamentos provam que a FSM processa cada uma das 1024 iterações de forma determinística, sem entrar em deadlock.
+
+teste 5b:
+Para detalhar os estados e transições de sinais exigidos pelo edital, foi feito um zoom em uma fração minúscula no início do teste. Isolamos uma janela de 300 ns logo após o início do teste, de 2515 ns a 2850 ns. Exatamente duas iterações completas do loop são vistas. Cada uma dessas iterações repetirá rigorosamente o seguinte comportamento sinal por sinal
