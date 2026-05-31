@@ -30,7 +30,7 @@ echo -e "${YELLOW}[2/4] Transpilando SystemVerilog com Verilator...${NC}"
 
 # A flag --trace garante suporte a waveforms (.vcd)
 # A ordem dos arquivos importa: cache_def.sv (package) deve vir primeiro.
-if ! verilator -Wall --trace --timing --cc \
+if ! verilator -Wall --trace --trace-structs --timing --cc \
     -Isrc \
     src/cache_def.sv \
     src/dm_cache_data.sv \

@@ -41,6 +41,13 @@ module dm_cache_fsm (
     assign req_tag = cpu_req.addr[31:14];
     assign req_idx = cpu_req.addr[13:4];
 
+    // Adicionando o sinal hit novamente com o atributo "public"
+    // Isso força o Verilator a preservar o sinal para que ele apareça no GTKWave
+    /* verilator lint_off UNOPTFLAT */
+    logic hit /* verilator public_flat_rd */;
+    /* verilator lint_on UNOPTFLAT */
+    assign hit = (tag_read.valid && (tag_read.tag == req_tag));
+
     // -------------------------------------------------------------------------
     // 2. Definição dos Estados da FSM
     // -------------------------------------------------------------------------
@@ -111,8 +118,7 @@ module dm_cache_fsm (
             // Verifica se a Tag corresponde e se o bloco é válido.
             // =================================================================
             COMPARE_TAG: begin
-                // Avaliação do HIT local e segura diretamente dentro do estado
-                if (tag_read.valid && (tag_read.tag == req_tag)) begin
+                if (hit) begin
                     // CACHE HIT!
                     cpu_res.ready = 1'b1;
                     
