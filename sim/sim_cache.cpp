@@ -1,4 +1,7 @@
 #include "Vcache_def.h"
+#include "Vdm_cache_data.h"
+#include "Vdm_cache_fsm.h"
+#include "Vdm_cache_tag.h"
 #include "Vtb_dm_cache.h"
 #include "verilated.h"
 

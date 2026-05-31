@@ -26,6 +26,9 @@ obj_dir/Vdm_cache_fsm: obj_dir/Vcache_def src/dm_cache_fsm.sv
 
 obj_dir/Vdm_cache_tag: obj_dir/Vcache_def src/dm_cache_tag.sv
 	$(VERILATOR) $(VFLAGS) --top-module dm_cache_tag src/cache_def.sv src/dm_cache_tag.sv
+
+obj_dir/Vmain_memory: obj_dir/Vcache_def src/main_memory.sv
+	$(VERILATOR) $(VFLAGS) --top-module main_memory src/cache_def.sv src/main_memory.sv
 #-------------------------------------------------
 obj_dir/Vcache_def: src/cache_def.sv
 	$(VERILATOR) $(VFLAGS) src/cache_def.sv
