@@ -17,7 +17,9 @@ module main_memory #(
 
     // 2. Máquina de Estados Interna para simular Latência
     typedef enum logic [1:0] {IDLE, WAIT_LATENCY, RESPOND} state_t;
+    /* verilator lint_off PROCASSINIT */
     state_t state = IDLE;
+    /* verilator lint_on PROCASSINIT */
 
     int counter;
     
