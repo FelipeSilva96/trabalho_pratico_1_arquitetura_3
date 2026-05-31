@@ -1,0 +1,8 @@
+teste 1.1:
+A CPU pediu algo (cpu_req.valid=1), o Cache não tinha (hit=0), então a FSM travou no estado de alocação (rstate=2) e pediu ajuda à Memória (mem_req.valid=1). A Memória demorou 10 ciclos até finalmente responder (mem_data.ready=1). Só então a Cache salvou o dado, confirmou o Hit e liberou a CPU dando um pulso rápido (cpu_res.ready=1).
+
+teste 1.2:
+A CPU pediu um endereço que acabou de ser carregado (cpu_req.valid=1). A Cache olhou em sua memória de tags e viu que o bloco já estava lá (hit=1). Com isso, a FSM não precisou entrar em pânico: ela resolveu tudo no próprio estado de comparação (rstate=1), ignorou completamente a Memória Principal (deixando mem_req.valid=0 e mem_data.ready=0 adormecidos) e liberou a CPU quase instantaneamente, dando um pulso rápido de confirmação (cpu_res.ready=1)
+
+teste 2.1:
+A CPU mandou um novo dado para ser salvo (cpu_req.valid=1, cpu_req.rw=1) em um endereço que já estava guardado na cache. A FSM acordou, foi para o estado de checagem (rstate=1) e confirmou o acerto (hit=1). Como a sua arquitetura usa a política de Write-Back, a FSM foi extremamente eficiente: ela apenas substituiu a palavra dentro da própria SRAM da cache e marcou a linha como 'suja' (dirty), tudo isso em um piscar de olhos. Ela não precisou incomodar a Memória Principal (que continuou em silêncio absoluto com mem_req.valid=0) e já disparou o sinal de pronto para liberar a CPU (cpu_res.ready=1)
