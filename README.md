@@ -552,6 +552,52 @@ vvp simv
 ```
 
 ---
+## 🚀 Compilação e Execução da Simulação
+
+O projeto disponibiliza um script de automação chamado `run_sim.sh`, responsável por executar todo o fluxo de compilação e simulação utilizando o Verilator.
+
+O script realiza automaticamente as seguintes etapas:
+
+1. Limpeza de arquivos gerados em execuções anteriores;
+2. Transpilação dos arquivos SystemVerilog para C++ utilizando o Verilator;
+3. Compilação do executável de simulação;
+4. Execução do testbench;
+5. Geração do arquivo de waveform (`wave.vcd`) para análise dos sinais.
+
+Para executar todo o fluxo, utilize o comando:
+
+```bash
+chmod +x run_sim.sh
+./run_sim.sh
+```
+
+Ao final da execução, caso a simulação seja concluída com sucesso, será gerado o arquivo:
+
+```text
+sim/wave.vcd
+```
+
+### 🌊 Visualização da Waveform
+
+Para visualizar os sinais gerados durante a simulação, utilize o GTKWave:
+
+```bash
+gtkwave sim/wave.vcd
+```
+
+O GTKWave permitirá analisar o comportamento interno do controlador de cache, incluindo:
+
+* Estados da FSM;
+* Sinais da interface CPU-cache;
+* Sinais da interface cache-memória;
+* Tags e dirty bits;
+* Operações de hit e miss;
+* Operações de allocate e write-back.
+
+Essa visualização é fundamental para validar o funcionamento do projeto e depurar eventuais problemas na implementação.
+
+
+---
 
 ## 🧪 Testes Implementados
 
